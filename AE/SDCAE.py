@@ -36,7 +36,7 @@ def SDCAE (Hy_W_conv_filters, Hy_W_kernel_size, Hy_W_MaxPooling_size, index):
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
         x = UpSampling1D((Hy_W_MaxPooling_size[index - i - 1]))(x)
-        decoded = Conv1D(1,(kernel_size),activation=None,padding='same')(x)
+        decoded = Conv1D(1,(2),activation=None,padding='same')(x)
 
     autoencoder = Model(input_img, decoded)
     autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
