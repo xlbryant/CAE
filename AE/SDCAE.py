@@ -12,23 +12,6 @@ config.gpu_options.allow_growth = True
 config.gpu_options.per_process_gpu_memory_fraction = 0.3
 set_session(tf.Session(config=config))
 
-conv_filters = 4
-kernel_size = 2
-
-# x = Conv1D(conv_filters, (kernel_size), activation='relu', padding='same')(input_img)
-# x = BatchNormalization()(x)
-# x = Activation('relu')(x)
-# x = MaxPooling1D((2), padding='same')(x)
-# x = Conv1D(conv_filters, (kernel_size), activation='relu', padding='same')(x)
-# x = BatchNormalization()(x)
-# x = Activation('relu')(x)
-# x = MaxPooling1D((2), padding='same')(x)
-# x = Conv1D(conv_filters, (kernel_size), activation='relu', padding='same')(x)
-# x = BatchNormalization()(x)
-# x = Activation('relu')(x)
-# encoded = MaxPooling1D((2), padding='same')(x)
-
-
 def SDCAE (Hy_W_conv_filters, Hy_W_kernel_size, Hy_W_MaxPooling_size, index):
     input_img = Input(shape=(8, 1))  # adapt this if using `channels_first` image data format
     x = 0
