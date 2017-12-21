@@ -5,7 +5,8 @@ CAE DCAE SDCAE implements
 Keras >= 2.0.7 Tensorflow >= 1.2 (backend)
 
 # Data
-UC Irvine abalone dataset
+UC Irvine abalone dataset. 
+
 The data is in '/data/rawdata'
 
 # Preprocess
