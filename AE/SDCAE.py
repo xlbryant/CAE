@@ -106,7 +106,7 @@ class AdvancedLearnignRateScheduler(Callback):
 
 import numpy as np
 X_train, X_val = loaddata() # Loading data
-noise_factor = 0.5
+noise_factor = 0.1
 X_train_noisy = X_train + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=X_train.shape)
 X_val_noisy = X_val + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=X_val.shape)
 
@@ -144,9 +144,9 @@ for i in range(3):
                     validation_data=(X_val_noisy, X_val),
                     callbacks=[
                         # Early stopping definition
-                        EarlyStopping(monitor='val_loss', patience=1, verbose=1),
+                        EarlyStopping(monitor='val_loss', patience=30, verbose=1),
                         # Decrease learning rate by 0.1 factor
-                        AdvancedLearnignRateScheduler(monitor='val_loss', patience=1, verbose=1, mode='auto',
+                        AdvancedLearnignRateScheduler(monitor='val_loss', patience=3, verbose=1, mode='auto',
                                                       decayRatio=0.1),
                         TensorBoard(log_dir='./tmp/DCAE')])
     weights_matrix = []

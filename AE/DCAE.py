@@ -9,46 +9,45 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.backend.tensorflow_backend import set_session
 config = tf.ConfigProto(allow_soft_placement=True)
 config.gpu_options.allow_growth = True
-config.gpu_options.per_process_gpu_memory_fraction = 0.3
 set_session(tf.Session(config=config))
-
 
 conv_filters = 4
 kernel_size = 2
-input_img = Input(shape=(8, 1))  # adapt this if using `channels_first` image data format
+Maxpooling_size = 2
+input_img = Input(shape=(8, 1))
+
 x = Conv1D(conv_filters, (kernel_size), activation='relu', padding='same')(input_img)
 x = BatchNormalization()(x)
 x = Activation('relu')(x)
-x = MaxPooling1D((2), padding='same')(x)
+x = MaxPooling1D((Maxpooling_size), padding='same')(x)
 x = Conv1D(conv_filters, (kernel_size), activation='relu', padding='same')(x)
 x = BatchNormalization()(x)
 x = Activation('relu')(x)
-x = MaxPooling1D((2), padding='same')(x)
+x = MaxPooling1D((Maxpooling_size), padding='same')(x)
 x = Conv1D(conv_filters, (kernel_size), activation='relu', padding='same')(x)
 x = BatchNormalization()(x)
 x = Activation('relu')(x)
-encoded = MaxPooling1D((2), padding='same')(x)
+encoded = MaxPooling1D((Maxpooling_size), padding='same')(x)
 
 # at this point the representation is (4, 4, 8) i.e. 128-dimensional
 
 x = Conv1D(conv_filters, (kernel_size), activation='relu', padding='same')(encoded)
 x = BatchNormalization()(x)
 x = Activation('relu')(x)
-x = UpSampling1D((2))(x)
+x = UpSampling1D((Maxpooling_size))(x)
 x = Conv1D(conv_filters, (kernel_size), activation='relu', padding='same')(x)
 x = BatchNormalization()(x)
 x = Activation('relu')(x)
-x = UpSampling1D((2))(x)
+x = UpSampling1D((Maxpooling_size))(x)
 x = Conv1D(conv_filters, (1), activation='relu')(x)
 x = BatchNormalization()(x)
 x = Activation('relu')(x)
-x = UpSampling1D((2))(x)
-decoded = Conv1D(1, (kernel_size), activation=None, padding='same')(x)
+x = UpSampling1D((Maxpooling_size))(x)
+decoded = Conv1D(1, (kernel_size), activation='relu', padding='same')(x)
 autoencoder = Model(input_img, decoded)
 autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
 
 import numpy as np
-
 
 # Function to load data
 def loaddata():
@@ -58,7 +57,7 @@ def loaddata():
     load_fn_val = '../data/preprocessdata/valset.mat'
     load_data_val = scipy.io.loadmat(load_fn_val)
     val_set = load_data_val['valset']
-    return trainset,val_set
+    return trainset, val_set
 
 
 # Callback method for reducing learning rate during training
@@ -70,6 +69,7 @@ class AdvancedLearnignRateScheduler(Callback):
         self.verbose = verbose
         self.wait = 0
         self.decayRatio = decayRatio
+
         if mode not in ['auto', 'min', 'max']:
             warnings.warn('Mode %s is unknown, '
                           'fallback to auto mode.'
@@ -94,9 +94,7 @@ class AdvancedLearnignRateScheduler(Callback):
         current_lr = K.get_value(self.model.optimizer.lr)
         print("\nLearning rate:", current_lr)
         if current is None:
-            warnings.warn('AdvancedLearnignRateScheduler'
-                          ' requires %s available!' %
-                          (self.monitor), RuntimeWarning)
+            warnings.warn('AdvancedLearnignRateScheduler requires %s available!' %(self.monitor), RuntimeWarning)
         if self.monitor_op(current, self.best):
             self.best = current
             self.wait = 0
@@ -112,36 +110,35 @@ class AdvancedLearnignRateScheduler(Callback):
                     self.wait = 0
             self.wait += 1
 
+# Parameters
 
-X_train, X_val = loaddata() # Loading data
-noise_factor = 0.5
+
+X_train, X_val = loaddata()
+noise_factor = 0.1
 X_train_noisy = X_train + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=X_train.shape)
 X_val_noisy = X_val + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=X_val.shape)
 
 from keras.callbacks import TensorBoard
+
 X_train = np.expand_dims(X_train, axis=2)
 X_val = np.expand_dims(X_val, axis=2)
 X_train_noisy = np.expand_dims(X_train_noisy, axis=2)
 X_val_noisy = np.expand_dims(X_val_noisy, axis=2)
-
 autoencoder.fit(X_train_noisy, X_train,
-                epochs=100,
+                epochs=1000,
                 batch_size=8,
                 shuffle=True,
                 validation_data=(X_val_noisy, X_val),
                 callbacks=[
                     # Early stopping definition
-                    EarlyStopping(monitor='val_loss', patience=1, verbose=1),
+                    EarlyStopping(monitor='val_loss', patience=30, verbose=1),
                     # Decrease learning rate by 0.1 factor
-                    AdvancedLearnignRateScheduler(monitor='val_loss', patience=1, verbose=1, mode='auto',
+                    AdvancedLearnignRateScheduler(monitor='val_loss', patience=3, verbose=1, mode='auto',
                                                   decayRatio=0.1),
-                    TensorBoard(log_dir='./tmp/DCAE')])
-
+                    TensorBoard(log_dir='./tmp/CAE')])
 weights_matrix = []
 for layer in autoencoder.layers:
     weights = layer.get_weights()
-    print weights
     weights_matrix.append(weights)
-scipy.io.savemat('weights/DCAE.mat',mdict={'weights_matrix': weights_matrix})
-
+scipy.io.savemat('./weights/CAE.mat',mdict={'weights_matrix': weights_matrix})
 decoded_imgs = autoencoder.predict(X_val)

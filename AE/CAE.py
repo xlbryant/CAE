@@ -130,9 +130,9 @@ autoencoder.fit(X_train_noisy, X_train,
                 validation_data=(X_val_noisy, X_val),
                 callbacks=[
                     # Early stopping definition
-                    EarlyStopping(monitor='val_loss', patience=20, verbose=1),
+                    EarlyStopping(monitor='val_loss', patience=30, verbose=1),
                     # Decrease learning rate by 0.1 factor
-                    AdvancedLearnignRateScheduler(monitor='val_loss', patience=1, verbose=1, mode='auto',
+                    AdvancedLearnignRateScheduler(monitor='val_loss', patience=3, verbose=1, mode='auto',
                                                   decayRatio=0.1),
                     TensorBoard(log_dir='./tmp/CAE')])
 weights_matrix = []
