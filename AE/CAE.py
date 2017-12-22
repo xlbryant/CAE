@@ -114,9 +114,8 @@ class AdvancedLearnignRateScheduler(Callback):
 
 
 X_train, X_val = loaddata()
-noise_factor = 0.5
-X_train_noisy = X_train + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=X_train.shape)
-X_val_noisy = X_val + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=X_val.shape)
+X_train_noisy = X_train
+X_val_noisy = X_val
 
 from keras.callbacks import TensorBoard
 
@@ -125,13 +124,13 @@ X_val = np.expand_dims(X_val, axis=2)
 X_train_noisy = np.expand_dims(X_train_noisy, axis=2)
 X_val_noisy = np.expand_dims(X_val_noisy, axis=2)
 autoencoder.fit(X_train_noisy, X_train,
-                epochs=100,
+                epochs=1000,
                 batch_size=8,
                 shuffle=True,
                 validation_data=(X_val_noisy, X_val),
                 callbacks=[
                     # Early stopping definition
-                    EarlyStopping(monitor='val_loss', patience=3, verbose=1),
+                    EarlyStopping(monitor='val_loss', patience=20, verbose=1),
                     # Decrease learning rate by 0.1 factor
                     AdvancedLearnignRateScheduler(monitor='val_loss', patience=1, verbose=1, mode='auto',
                                                   decayRatio=0.1),
@@ -142,23 +141,3 @@ for layer in autoencoder.layers:
     weights_matrix.append(weights)
 scipy.io.savemat('./weights/CAE.mat',mdict={'weights_matrix': weights_matrix})
 decoded_imgs = autoencoder.predict(X_val)
-# n = 10
-# plt.figure(figsize=(20, 4))
-# for i in range(n):
-#     # display original
-#     ax = plt.subplot(2, n, i+1)
-#     plt.plot(range(18000), Xval[i].reshape(18000))
-#     # plt.imshow(x_test[i].reshape(18000))
-#     # plt.gray()
-#     # ax.get_xaxis().set_visible(False)
-#     # ax.get_yaxis().set_visible(False)
-#
-#     # display reconstruction
-#     ax = plt.subplot(2, n, i+1 + n)
-#     plt.plot(range(18000), decoded_imgs[i].reshape(18000))
-#     # plt.imshow(decoded_imgs[i].reshape(18000))
-#     # plt.gray()
-#     # ax.get_xaxis().set_visible(False)
-#     # ax.get_yaxis().set_visible(False)
-# plt.savefig('recon_filters256_kernel32.eps', format='eps', dpi=1000)
-# # plt.show()
