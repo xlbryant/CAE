@@ -138,7 +138,7 @@ for i in range(3):
             else:
                 layer.set_weights(weights_matrix[j])
     autoencoder.fit(X_train_noisy, X_train,
-                    epochs=100,
+                    epochs=1000,
                     batch_size=8,
                     shuffle=True,
                     validation_data=(X_val_noisy, X_val),
