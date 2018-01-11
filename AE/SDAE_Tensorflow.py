@@ -18,7 +18,7 @@ def loaddata():
     val_set = load_data_val['valset']
     return trainset, val_set
 
-training_epochs = 300
+training_epochs = 100
 batch_size = 100
 display_step = 1
 stack_size = 3
@@ -56,6 +56,7 @@ w = []
 b = []
 Hidden_feature = [] # save the feature of every ae
 X_train = np.array([0])
+X_test = np.array([0])
 for j in xrange(stack_size):
     if j == 0:
         X_train = np.array(train_set)

@@ -29,12 +29,14 @@ class AdditiveDAE(object):
     def _initialize_weights(self):
         all_weights = dict() #????
 
-        with tf.name_scope(self.name_scope) as scope:
-            all_weights['w1'] = tf.get_variable(name=scope+"w1", shape=[self.n_input, self.n_hidden],
+        with tf.variable_scope(self.name_scope):
+            all_weights['w1'] = tf.get_variable(name="w1", shape=[self.n_input, self.n_hidden],
                                          initializer=tf.contrib.layers.xavier_initializer())
-            all_weights['b1'] = tf.Variable(tf.zeros([self.n_hidden], dtype=tf.float32))
-            all_weights['w2'] = tf.Variable(tf.zeros([self.n_hidden, self.n_input], dtype=tf.float32))
-            all_weights['b2'] = tf.Variable(tf.zeros([self.n_input], dtype=tf.float32))
+            all_weights['b1'] = tf.get_variable(name='b1', shape=[self.n_hidden], initializer=tf.constant_initializer(0.))
+            #all_weights['w2'] = tf.Variable(tf.zeros([self.n_hidden, self.n_input], dtype=tf.float32))
+            all_weights['w2'] = tf.get_variable(name='w2',shape=[self.n_hidden,self.n_input],initializer=tf.constant_initializer(0.))
+            all_weights['b2'] = tf.get_variable(name='b2',shape=[self.n_input], initializer=tf.constant_initializer(0.))
+            #Variable(tf.zeros([self.n_input], dtype=tf.float32))
         return all_weights
 
     def partial_fit(self, X):
